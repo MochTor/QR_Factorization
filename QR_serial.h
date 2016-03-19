@@ -9,6 +9,14 @@
 #define QRSERIAL_H
 
 /**
+ * Initialize a matrix
+ * @param A is the matrix
+ * @param m is the number of rows
+ * @param n is the number of columns
+ */
+void initMatrix(double *A, int m, int n);
+
+/**
   * Rank 1 update of columns of A
   * A     m x n lda
   * col   m x 1 ldc
