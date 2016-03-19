@@ -51,6 +51,6 @@ void scale(double *d, int m, int ld, double s);
   * R n x n
   * m >= n
   */
-void gram(double* A, int M, int N, double *R);
+void gram(double* A, int m, int n, double *R);
 
 #endif

@@ -33,7 +33,7 @@ int int main(int argc, char const *argv[]) {
     bzero(A, m*n);  //cleaning A's memory
     bzero(R, n*n);  //cleaning R's memory
     initMatrix(A, m, n);    //init A matrix with random values
-    gram(A, m, n, R);   //applying Gram-Schmidt algorithm
+    //gram(A, m, n, R);   //applying Gram-Schmidt algorithm
     free(A);    //deallocating A's memory
     free(R);    //deallocating R's memory
     stop = clock(); //memorizing stop time
@@ -53,6 +53,19 @@ void initMatrix(double *A, int m, int n) {
     }
 }
 
-void gram(double* A, int M, int N, double *R) {
-    
+void gram(double* A, int m, int n, double *R) {
+
+
+}
+
+void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
+    double s;
+
+    for (int jj = 0; jj < k; jj++) {    //Moving through columns
+        s = 0;
+        for (int ii = 0; ii < m; ii++) {    //Moving through rows
+            s += x[ii * ldx] * A[ii*lda + jj]
+        }
+        y[jj] = s;  //Adding the sum to result vector
+    }
 }
