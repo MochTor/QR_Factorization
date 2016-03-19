@@ -69,3 +69,10 @@ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
         y[jj] = s;  //Adding the sum to result vector
     }
 }
+
+void scale(double *d, int m, int ld, double s) {    
+    for (int ii = 0; ii < m; ii++) {    //Moving through rows
+        d[ii*ld] = d[ii*ld] / s;    //applying scale
+    }
+
+}
