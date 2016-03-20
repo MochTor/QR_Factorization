@@ -14,7 +14,7 @@
 
 #include "QR_serial.h"
 
-int int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[]) {
     //--------------- Defining variables ---------------
     clock_t start, stop;    //timers for calculating CPU times
 
@@ -46,9 +46,9 @@ int int main(int argc, char const *argv[]) {
 
 void initMatrix(double *A, int m, int n) {
     srand((unsigned int) 123);
-    for (int i = 0; i < m; i++) {
-        for (int ii = 0; i < n; i++) {
-            A[i][ii] = rand() % 100;
+    for (int ii = 0; ii < n; ii++) {
+        for (int jj = 0; jj < m; jj++) {
+            A[jj*n + ii] = rand() % 100;
         }
     }
 }
@@ -61,7 +61,7 @@ void gram(double* A, int m, int n, double *R) {
         sf = sqrt(R[ii*n + ii]);                            //2
         scale(&A[ii], m, n, sf);                            //3
         scale(&R[ii*n + ii], n, n, sf);                     //4
-        r1_update(&A[ii+1], m, n-i-2, n, &A[ii], n, &R[ii]);//5
+        r1_update(&A[ii+1], m, n-ii-2, n, &A[ii], n, &R[ii]);//5
     }
 }
 
@@ -71,7 +71,7 @@ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
     for (int jj = 0; jj < k; jj++) {    //Moving through columns
         s = 0;
         for (int ii = 0; ii < m; ii++) {    //Moving through rows
-            s += x[ii * ldx] * A[ii*lda + jj]
+            s += x[ii * ldx] * A[ii*lda + jj];
         }
         y[jj] = s;  //Adding the sum to result vector
     }
