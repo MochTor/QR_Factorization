@@ -16,7 +16,7 @@
 
 int int main(int argc, char const *argv[]) {
     //--------------- Defining variables ---------------
-    clock_t start, stop;    //timers fof calculating CPU times
+    clock_t start, stop;    //timers for calculating CPU times
 
     int m = 400;    //matrix rows number (first set)
     int n = 300;    //matrix columns number (first set)
@@ -59,7 +59,7 @@ void gram(double* A, int m, int n, double *R) {
 }
 
 void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
-    double s;
+    double s;   //It memorizes the sum
 
     for (int jj = 0; jj < k; jj++) {    //Moving through columns
         s = 0;
@@ -70,9 +70,14 @@ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
     }
 }
 
-void scale(double *d, int m, int ld, double s) {    
-    for (int ii = 0; ii < m; ii++) {    //Moving through rows
-        d[ii*ld] = d[ii*ld] / s;    //applying scale
-    }
+void scale(double *d, int m, int ld, double s) {
+    for (int ii = 0; ii < m; ii++)    //Moving through rows
+        d[ii*ld] = d[ii*ld] / s;    //Applying scale
+}
 
+void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
+    //Does it work? Recheck!
+    for (int jj = 0; jj < n-1; jj++)  //Moving through columns
+        for (int ii = 0; ii < m; ii++)   //Moving through rows
+            A[lda*ii + jj+1] -= row[jj] * col[ldc*ii];
 }
