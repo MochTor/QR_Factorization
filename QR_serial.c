@@ -39,7 +39,7 @@ int main(int argc, char const *argv[]) {
     stop = clock(); //memorizing stop time
     //---------------------------------------------------
 
-    printf("Elapsed time %7.3f [s]\n", (stop-start)/(double)CLOCKS_PER_SEC);
+    printf("Elapsed time %7.5f [s]\n", (stop-start)/(double)CLOCKS_PER_SEC);
 
     return 0;
 }
@@ -60,7 +60,7 @@ void gram(double* A, int m, int n, double *R) {
         xTA(&R[ii*n + ii], n-ii, &A[ii], m, n, &A[ii], n);  //1
         sf = sqrt(R[ii*n + ii]);                            //2
         scale(&A[ii], m, n, sf);                            //3
-        scale(&R[ii*n + ii], n, n, sf);                     //4
+        scale(&R[ii*n + ii], n, 1, sf);                     //4
         r1_update(&A[ii+1], m, n-ii-2, n, &A[ii], n, &R[ii]);//5
     }
 }
