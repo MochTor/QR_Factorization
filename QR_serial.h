@@ -9,12 +9,12 @@
 #define QRSERIAL_H
 
 /**
- * Initialize a matrix to random values
+ * Initialize a matrix, according to text
  * @param A is the matrix
  * @param m is the number of rows
  * @param n is the number of columns
  */
-void initMatrix(double *A, int m, int n);
+void initMatrix(double *A, int n);
 
 /**
  * Initialize a matrix to all zeros

@@ -32,7 +32,8 @@ int main(int argc, char const *argv[]) {
     R = (double*) malloc (n * n * sizeof(double));  //allocating memory for matrix R
     bzero(A, m*n);  //cleaning A's memory
     bzero(R, n*n);  //cleaning R's memory
-    initMatrix(A, m, n);    //init A matrix with random values
+    initMatrixZero(A, m, n);    //init matrix A to all zeros
+    initMatrix(A, n);    //init matrix A diagonal with values
     initMatrixZero(R, n, n);    //init matrix R to all zeros
     gram(A, m, n, R);   //applying Gram-Schmidt algorithm
     free(A);    //deallocating A's memory
@@ -45,12 +46,9 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 
-void initMatrix(double *A, int m, int n) {
-    srand((unsigned int) 123);
+void initMatrix(double *A, int n) {
     for (int ii = 0; ii < n; ii++) {
-        for (int jj = 0; jj < m; jj++) {
-            A[jj*n + ii] = rand() % 100;
-        }
+        A[ii*n + ii] = (double)ii + 1;
     }
 }
 
