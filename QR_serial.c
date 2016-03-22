@@ -33,6 +33,7 @@ int main(int argc, char const *argv[]) {
     bzero(A, m*n);  //cleaning A's memory
     bzero(R, n*n);  //cleaning R's memory
     initMatrix(A, m, n);    //init A matrix with random values
+    initMatrixZero(R, n, n);    //init matrix R to all zeros
     gram(A, m, n, R);   //applying Gram-Schmidt algorithm
     free(A);    //deallocating A's memory
     free(R);    //deallocating R's memory
@@ -49,6 +50,14 @@ void initMatrix(double *A, int m, int n) {
     for (int ii = 0; ii < n; ii++) {
         for (int jj = 0; jj < m; jj++) {
             A[jj*n + ii] = rand() % 100;
+        }
+    }
+}
+
+void initMatrixZero(double *A, int m, int n) {
+    for (int ii = 0; ii < n; ii++) {
+        for (int jj = 0; jj < m; jj++) {
+            A[jj*n + ii] = 0;
         }
     }
 }
