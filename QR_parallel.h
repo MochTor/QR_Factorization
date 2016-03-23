@@ -1,12 +1,12 @@
 /**
- * Header file for serial QR factorization program used for Parallel Computing class
+ * Header file for parallel QR factorization program used for Parallel Computing class
  *
  * 2016 Marco Tieghi - marco01.tieghi@student.unife.it
  *
  */
 
-#ifndef QRSERIAL_H
-#define QRSERIAL_H
+#ifndef QRPARALLEL_H
+#define QRPARALLEL_H
 
 /**
  * Initialize a matrix, according to text
@@ -30,7 +30,7 @@ void initMatrixZero(double *A, int m, int n);
   * col   m x 1 ldc
   * coeff 1 x n
   */
-void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row);
+// void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row);
 
 
 /**
@@ -40,7 +40,7 @@ void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *r
   * x : m, leading dim. ldx
   * y : 1 x k
   */
-void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx);
+// void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx);
 
 /**
   * Mult. for constant s
@@ -49,7 +49,7 @@ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx);
   * ld leading dimension (distance from elements)
   *
   */
-void scale(double *d, int m, int ld, double s);
+// void scale(double *d, int m, int ld, double s);
 
 /**
   * Performs Modified Gram Schmidt
@@ -59,6 +59,6 @@ void scale(double *d, int m, int ld, double s);
   * R n x n
   * m >= n
   */
-void gram(double* A, int m, int n, double *R);
+// void gram(double* A, int m, int n, double *R);
 
 #endif
