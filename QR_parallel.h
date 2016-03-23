@@ -30,7 +30,7 @@ void initMatrixZero(double *A, int m, int n);
   * col   m x 1 ldc
   * coeff 1 x n
   */
-// void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row);
+__global__ void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row);
 
 
 /**
@@ -40,7 +40,7 @@ void initMatrixZero(double *A, int m, int n);
   * x : m, leading dim. ldx
   * y : 1 x k
   */
-// void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx);
+__global__ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx);
 
 /**
   * Mult. for constant s
@@ -49,7 +49,7 @@ void initMatrixZero(double *A, int m, int n);
   * ld leading dimension (distance from elements)
   *
   */
-// void scale(double *d, int m, int ld, double s);
+__global__ void scale(double *d, int m, int ld, double *s);
 
 /**
   * Performs Modified Gram Schmidt
@@ -59,6 +59,6 @@ void initMatrixZero(double *A, int m, int n);
   * R n x n
   * m >= n
   */
-// void gram(double* A, int m, int n, double *R);
+void gram(double* A, int m, int n, double *R);
 
 #endif
