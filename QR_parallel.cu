@@ -73,7 +73,7 @@ void initMatrixZero(double *A, int m, int n) {
     }
 }
 
-__global__ void gram(double* A, int m, int n, double *R) {
+void gram(double* A, int m, int n, double *R) {
     double sf;  //Scale factor
     double *A_d, *R_d;  //A is the initial matrix, R the upper triangular matrix. Copy on device (_d)
 
@@ -94,7 +94,7 @@ __global__ void gram(double* A, int m, int n, double *R) {
     cudaFree(R_d);  //deallocating R's memory on device
 }
 
-void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
+__global__ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
     double s;   //It memorizes the sum
 
@@ -105,12 +105,17 @@ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
         y[idx] = s;  //Adding the sum to result vector
     }
 }
-// }
-//
-// void scale(double *d, int m, int ld, double s) {
-//     for (int ii = 0; ii < m; ii++)    //Moving through rows
-//         d[ii*ld] = d[ii*ld] / s;    //Applying scale
-// }
+
+/**
+ * @param  double *s: s is now a pointer, not a value, as required in the assignment
+ */
+__global__ void scale(double *d, int m, int ld, double *s) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
+
+    if (idx < m) {
+        d[idx*ld] = d[idx*ld] / *s;    //Applying scale
+    }
+}
 //
 // void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
 //     //Does it work? Recheck!
