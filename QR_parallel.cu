@@ -93,20 +93,18 @@ __global__ void gram(double* A, int m, int n, double *R) {
     cudaFree(A_d);  //deallocating A's memory on device
     cudaFree(R_d);  //deallocating R's memory on device
 }
-//
-// void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
-//     double s;   //It memorizes the sum
-//
-//     for (int jj = 0; jj < k; jj++) {    //Moving through columns
-//         s = 0;
-//         for (int ii = 0; ii < m; ii++) {    //Moving through rows
-//             s += x[ii * ldx] * A[ii*lda + jj];
-//         }
-//         y[jj] = s;  //Adding the sum to result vector
-//     }
-//
-//     int index = blockIdx.x * blockDim.x + threadIdx.x;
-// }
+
+void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
+    double s;   //It memorizes the sum
+
+    if (idx < k) {
+        for (int ii = 0; ii < m; ii++) {    //Moving through rows
+            s += x[ii * ldx] * A[idx + ii*lda];
+        }
+        y[idx] = s;  //Adding the sum to result vector
+    }
+}
 // }
 //
 // void scale(double *d, int m, int ld, double s) {
