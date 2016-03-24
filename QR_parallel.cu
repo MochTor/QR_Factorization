@@ -11,6 +11,7 @@
 #include <math.h>
 #include <string.h>
 #include <cuda.h>
+#include <helper_cuda.h>
 
 #include "QR_parallel.h"
 
@@ -47,8 +48,13 @@ int main(int argc, char const *argv[]) {
     cudaEventSynchronize(stop);
     //---------------------------------------------------
 
+    //------------ Printing results on screen -----------
     cudaEventElapsedTime(&elapsedTime, start, stop);
-    printf("Elapsed time %7.5f [s]\n", elapsedTime/1000);
+    printf("Elapsed time %7.5f [s]\n", elapsedTime/1000);   //elapsedTime keeps time in milliseconds
+    //---------------------------------------------------
+
+    cudaEventDestroy(start);
+	cudaEventDestroy(stop);
 
     return 0;
 }
@@ -67,17 +73,26 @@ void initMatrixZero(double *A, int m, int n) {
     }
 }
 
-// void gram(double* A, int m, int n, double *R) {
-//     double sf;  //Scale factor
+__global__ void gram(double* A, int m, int n, double *R) {
+    double sf;  //Scale factor
+    double *A_d, *R_d;  //A is the initial matrix, R the upper triangular matrix. Copy on device (_d)
+
+    checkCudaErrors(cudaMalloc((void **) &A_d, m * n *sizeof(double))); //allocating A's memory on device
+    checkCudaErrors(cudaMalloc((void **) &R_d, n *n *sizeof(double)) ); //allocating R's memory on device
+
+    checkCudaErrors(cudaMemcpy(A_d, A, m * n *sizeof(double), cudaMemcpyHostToDevice)); //copying A's data into A_d's space
+    checkCudaErrors(cudaMemcpy(R_d, R, n * n *sizeof(double), cudaMemcpyHostToDevice)); //copying R's data into R_d's space
+
 //
-//     for (int ii = 0; ii < n-1; ii++) {
-//         xTA(&R[ii*n + ii], n-ii, &A[ii], m, n, &A[ii], n);  //1
-//         sf = sqrt(R[ii*n + ii]);                            //2
-//         scale(&A[ii], m, n, sf);                            //3
-//         scale(&R[ii*n + ii], n, 1, sf);                     //4
-//         r1_update(&A[ii+1], m, n-ii-2, n, &A[ii], n, &R[ii]);//5
-//     }
-// }
+//     algorithm
+//
+
+    checkCudaErrors(cudaMemcpy(A, A_d, m * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying A_d's data into A's space
+    checkCudaErrors(cudaMemcpy(R, R_d, n * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying R_d's data into R's space
+
+    cudaFree(A_d);  //deallocating A's memory on device
+    cudaFree(R_d);  //deallocating R's memory on device
+}
 //
 // void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
 //     double s;   //It memorizes the sum
@@ -89,6 +104,9 @@ void initMatrixZero(double *A, int m, int n) {
 //         }
 //         y[jj] = s;  //Adding the sum to result vector
 //     }
+//
+//     int index = blockIdx.x * blockDim.x + threadIdx.x;
+// }
 // }
 //
 // void scale(double *d, int m, int ld, double s) {
