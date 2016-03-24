@@ -74,8 +74,9 @@ void initMatrixZero(double *A, int m, int n) {
 }
 
 void gram(double* A, int m, int n, double *R) {
-    double sf;  //Scale factor
     double *A_d, *R_d;  //A is the initial matrix, R the upper triangular matrix. Copy on device (_d)
+    dim3 dimGrid(THREADS_PER_BLOCK, 1, 1);
+    dim3 dimBlock(THREADS_PER_BLOCK, (THREADS_PER_BLOCK + m - 1)/THREADS_PER_BLOCK, 1);
 
     checkCudaErrors(cudaMalloc((void **) &A_d, m * n *sizeof(double))); //allocating A's memory on device
     checkCudaErrors(cudaMalloc((void **) &R_d, n *n *sizeof(double)) ); //allocating R's memory on device
@@ -83,9 +84,12 @@ void gram(double* A, int m, int n, double *R) {
     checkCudaErrors(cudaMemcpy(A_d, A, m * n *sizeof(double), cudaMemcpyHostToDevice)); //copying A's data into A_d's space
     checkCudaErrors(cudaMemcpy(R_d, R, n * n *sizeof(double), cudaMemcpyHostToDevice)); //copying R's data into R_d's space
 
-//
-//     algorithm
-//
+    for (int ii = 0; ii < n; ii++) {
+        xTA <<< n-1, dimBlock >>> (&R_d[ii*n + ii], n - ii, &A_d[ii], m, n, &A_d[ii], n);   //1
+        scale <<< m, dimBlock >>> (&A_d[ii], m, n, &R_d[ii*n + ii]);    //2-3
+        scale <<< n - ii, dimBlock >>> (&R_d[ii*n + ii], n - ii, 1, &R_d[ii*n + ii]);   //2-4
+        //     last step
+    }
 
     checkCudaErrors(cudaMemcpy(A, A_d, m * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying A_d's data into A's space
     checkCudaErrors(cudaMemcpy(R, R_d, n * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying R_d's data into R's space
@@ -113,12 +117,17 @@ __global__ void scale(double *d, int m, int ld, double *s) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
 
     if (idx < m) {
-        d[idx*ld] = d[idx*ld] / *s;    //Applying scale
+        d[idx*ld] = d[idx*ld] / sqrt(*s);    //Applying scale
     }
 }
-//
-// void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
-//     //Does it work? Recheck!
+
+void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
+    //Does it work? Recheck!
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int idy = blockIdx.y * blockDim.y + threadIdx.y;
+    if (idx < m && idy < m) {
+        //converted algorithm
+    }
 //     for (int jj = 0; jj < n-1; jj++)  //Moving through columns
 //         for (int ii = 0; ii < m; ii++)   //Moving through rows
 //             A[lda*ii + jj+1] -= row[jj] * col[ldc*ii];
