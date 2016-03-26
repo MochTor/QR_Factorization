@@ -83,7 +83,7 @@ void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *r
     //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)∗R(ii,ii+1:n−1)
     for (int ii = 0; ii < n; ii++) {
         for (int jj = 0; jj < m; jj++) {
-            A[jj*lda + ii] = A[jj*lda + ii] - col[jj*ldc] * row[jj];
+            A[jj*lda + ii] = A[jj*lda + ii] - col[jj*ldc] * row[ii];
         }
     }
 }
