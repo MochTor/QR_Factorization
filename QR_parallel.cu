@@ -65,18 +65,10 @@ void initMatrix(double *A, int n) {
     }
 }
 
-void initMatrixZero(double *A, int m, int n) {
-    for (int ii = 0; ii < n; ii++) {
-        for (int jj = 0; jj < m; jj++) {
-            A[jj*n + ii] = 0;
-        }
-    }
-}
-
 void gram(double* A, int m, int n, double *R) {
     double *A_d, *R_d;  //A is the initial matrix, R the upper triangular matrix. Copy on device (_d)
-    dim3 dimGrid(THREADS_PER_BLOCK, 1, 1);
-    dim3 dimBlock(THREADS_PER_BLOCK, (THREADS_PER_BLOCK + m - 1)/THREADS_PER_BLOCK, 1);
+    dim3 dimBlock(THREADS_PER_BLOCK, 1, 1); //as required, each block has 512 threads
+    dim3 dimGrid(THREADS_PER_BLOCK, (THREADS_PER_BLOCK + m - 1)/THREADS_PER_BLOCK, 1);
 
     checkCudaErrors(cudaMalloc((void **) &A_d, m * n *sizeof(double))); //allocating A's memory on device
     checkCudaErrors(cudaMalloc((void **) &R_d, n *n *sizeof(double)) ); //allocating R's memory on device
