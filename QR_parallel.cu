@@ -36,11 +36,9 @@ int main(int argc, char const *argv[]) {
     cudaEventRecord(start, 0);    //memorizing starting time
     A = (double*) malloc (m * n * sizeof(double));  //allocating memory for matrix A
     R = (double*) malloc (n * n * sizeof(double));  //allocating memory for matrix R
-    bzero(A, m*n);  //cleaning A's memory
-    bzero(R, n*n);  //cleaning R's memory
-    initMatrixZero(A, m, n);    //init matrix A to all zeros
+    bzero(A, m*n);  //cleaning A's memory, init matrix A with 0s
+    bzero(R, n*n);  //cleaning R's memory, init matrix R with 0s
     initMatrix(A, n);    //init matrix A diagonal with values
-    initMatrixZero(R, n, n);    //init matrix R to all zeros
     gram(A, m, n, R);   //applying Gram-Schmidt algorithm
     free(A);    //deallocating A's memory
     free(R);    //deallocating R's memory
@@ -77,10 +75,10 @@ void gram(double* A, int m, int n, double *R) {
     checkCudaErrors(cudaMemcpy(R_d, R, n * n *sizeof(double), cudaMemcpyHostToDevice)); //copying R's data into R_d's space
 
     for (int ii = 0; ii < n; ii++) {
-        xTA <<< n-1, dimBlock >>> (&R_d[ii*n + ii], n - ii, &A_d[ii], m, n, &A_d[ii], n);   //1
+        xTA <<< n-1, dimBlock >>> (&R_d[ii*n + ii], n-ii, &A_d[ii], m, n, &A_d[ii], n);   //1
         scale <<< m, dimBlock >>> (&A_d[ii], m, n, &R_d[ii*n + ii]);    //2-3
-        scale <<< n - ii, dimBlock >>> (&R_d[ii*n + ii], n - ii, 1, &R_d[ii*n + ii]);   //2-4
-        //     last step
+        scale <<< n - ii, dimBlock >>> (&R_d[ii*n + ii], n-ii, 1, &R_d[ii*n + ii]);   //2-4
+        r1_update <<< dimGrid, dimBlock >>> (&A_d[ii + 1], m, n-ii-2, n, &A_d[ii], n, &R_d[ii]);    //5
     }
 
     checkCudaErrors(cudaMemcpy(A, A_d, m * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying A_d's data into A's space
@@ -114,13 +112,12 @@ __global__ void scale(double *d, int m, int ld, double *s) {
 }
 
 void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
-    //Does it work? Recheck!
+    //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)∗R(ii,ii+1:n−1)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
     if (idx < m && idy < m) {
-        //converted algorithm
+        for (int ii=0; ii < n; i++) {
+            A[idx*lda + ii] = A[idx*lda + ii] - col[idy*ldc] * row[ii];
+        }
     }
-//     for (int jj = 0; jj < n-1; jj++)  //Moving through columns
-//         for (int ii = 0; ii < m; ii++)   //Moving through rows
-//             A[lda*ii + jj+1] -= row[jj] * col[ldc*ii];
-// }
+}
