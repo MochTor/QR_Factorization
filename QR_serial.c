@@ -30,11 +30,9 @@ int main(int argc, char const *argv[]) {
     start = clock();    //memorizing starting time
     A = (double*) malloc (m * n * sizeof(double));  //allocating memory for matrix A
     R = (double*) malloc (n * n * sizeof(double));  //allocating memory for matrix R
-    bzero(A, m*n);  //cleaning A's memory
-    bzero(R, n*n);  //cleaning R's memory
-    initMatrixZero(A, m, n);    //init matrix A to all zeros
+    bzero(A, m*n);  //cleaning A's memory, init matrix A with 0s
+    bzero(R, n*n);  //cleaning R's memory, init matrix R with 0s
     initMatrix(A, n);    //init matrix A diagonal with values
-    initMatrixZero(R, n, n);    //init matrix R to all zeros
     gram(A, m, n, R);   //applying Gram-Schmidt algorithm
     free(A);    //deallocating A's memory
     free(R);    //deallocating R's memory
@@ -49,14 +47,6 @@ int main(int argc, char const *argv[]) {
 void initMatrix(double *A, int n) {
     for (int ii = 0; ii < n; ii++) {
         A[ii*n + ii] = (double)ii + 1;
-    }
-}
-
-void initMatrixZero(double *A, int m, int n) {
-    for (int ii = 0; ii < n; ii++) {
-        for (int jj = 0; jj < m; jj++) {
-            A[jj*n + ii] = 0;
-        }
     }
 }
 
