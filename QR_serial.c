@@ -80,8 +80,10 @@ void scale(double *d, int m, int ld, double s) {
 }
 
 void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
-    //Does it work? Recheck!
-    for (int jj = 0; jj < n-1; jj++)  //Moving through columns
-        for (int ii = 0; ii < m; ii++)   //Moving through rows
-            A[lda*ii + jj+1] -= row[jj] * col[ldc*ii];
+    //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)∗R(ii,ii+1:n−1)
+    for (int ii = 0; ii < n; ii++) {
+        for (int jj = 0; jj < m; jj++) {
+            A[jj*lda + ii] = A[jj*lda + ii] - col[jj*ldc] * row[jj];
+        }
+    }
 }
