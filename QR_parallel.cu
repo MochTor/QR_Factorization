@@ -19,10 +19,10 @@
 
 int main(int argc, char const *argv[]) {
     //--------------- Defining variables ---------------
-    int m = 400;    //matrix rows number (first set)
-    int n = 300;    //matrix columns number (first set)
-    // int m = 1000;    //matrix rows number (second set)
-    // int n = 800;     //matrix columns number (second set)
+    // int m = 400;    //matrix rows number (first set)
+    // int n = 300;    //matrix columns number (first set)
+    int m = 1000;    //matrix rows number (second set)
+    int n = 800;     //matrix columns number (second set)
 
     double *A_h, *R_h;  //A is the initial matrix, R the upper triangular matrix. Copy on host (_h)
 
@@ -34,21 +34,22 @@ int main(int argc, char const *argv[]) {
 
     //--------------- Starting algoritm -----------------
     cudaEventRecord(start, 0);    //memorizing starting time
-    A = (double*) malloc (m * n * sizeof(double));  //allocating memory for matrix A
-    R = (double*) malloc (n * n * sizeof(double));  //allocating memory for matrix R
-    bzero(A, m*n);  //cleaning A's memory, init matrix A with 0s
-    bzero(R, n*n);  //cleaning R's memory, init matrix R with 0s
-    initMatrix(A, n);    //init matrix A diagonal with values
-    gram(A, m, n, R);   //applying Gram-Schmidt algorithm
-    free(A);    //deallocating A's memory
-    free(R);    //deallocating R's memory
+    A_h = (double*) malloc (m * n * sizeof(double));  //allocating memory for matrix A
+    R_h = (double*) malloc (n * n * sizeof(double));  //allocating memory for matrix R
+    bzero(A_h, m*n);  //cleaning A's memory, init matrix A with 0s
+    bzero(R_h, n*n);  //cleaning R's memory, init matrix R with 0s
+    initMatrix(A_h, n);    //init matrix A diagonal with values
+    gram(A_h, m, n, R_h);   //applying Gram-Schmidt algorithm
+    free(A_h);    //deallocating A's memory
+    free(R_h);    //deallocating R's memory
     cudaEventRecord(stop, 0); //memorizing stop time
     cudaEventSynchronize(stop);
     //---------------------------------------------------
 
     //------------ Printing results on screen -----------
     cudaEventElapsedTime(&elapsedTime, start, stop);
-    printf("Elapsed time %7.5f [s]\n", elapsedTime/1000);   //elapsedTime keeps time in milliseconds
+    printf("Elapsed time: %7.5f s\n", elapsedTime/1000);   //elapsedTime keeps time in milliseconds
+    printf("Bandwidth: %7.5f GB/s\n", m*n * sizeof(double) / (elapsedTime/1000));
     //---------------------------------------------------
 
     cudaEventDestroy(start);
@@ -102,6 +103,7 @@ __global__ void xTA (double *y, int k, double*A, int m, int lda, double *x, int 
 
 /**
  * @param  double *s: s is now a pointer, not a value, as required in the assignment
+ *                    it's not yet scaled, sqrt needs to be applied inside function (not as in serial code)
  */
 __global__ void scale(double *d, int m, int ld, double *s) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
@@ -111,12 +113,13 @@ __global__ void scale(double *d, int m, int ld, double *s) {
     }
 }
 
-void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
-    //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)∗R(ii,ii+1:n−1)
+__global__ void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)*R(ii,ii+1:n−1)
     if (idx < m && idy < m) {
-        for (int ii=0; ii < n; i++) {
+        for (int ii=0; ii < n; ii++) {
             A[idx*lda + ii] = A[idx*lda + ii] - col[idy*ldc] * row[ii];
         }
     }

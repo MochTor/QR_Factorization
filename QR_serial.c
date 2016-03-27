@@ -18,10 +18,10 @@ int main(int argc, char const *argv[]) {
     //--------------- Defining variables ---------------
     clock_t start, stop;    //timers for calculating CPU times
 
-    int m = 400;    //matrix rows number (first set)
-    int n = 300;    //matrix columns number (first set)
-    // int m = 1000;    //matrix rows number (second set)
-    // int n = 800;     //matrix columns number (second set)
+    // int m = 400;    //matrix rows number (first set)
+    // int n = 300;    //matrix columns number (first set)
+    int m = 1000;    //matrix rows number (second set)
+    int n = 800;     //matrix columns number (second set)
 
     double *A, *R;  //A is the initial matrix, R the upper triangular matrix
     //---------------------------------------------------
@@ -39,7 +39,7 @@ int main(int argc, char const *argv[]) {
     stop = clock(); //memorizing stop time
     //---------------------------------------------------
 
-    printf("Elapsed time %7.5f [s]\n", (stop-start)/(double)CLOCKS_PER_SEC);
+    printf("Elapsed time %7.5f s\n", (stop-start)/(double)CLOCKS_PER_SEC);
 
     return 0;
 }
