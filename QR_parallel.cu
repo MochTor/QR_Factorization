@@ -79,7 +79,7 @@ void gram(double* A, int m, int n, double *R) {
         xTA <<< n-1, dimBlock >>> (&R_d[ii*n + ii], n-ii, &A_d[ii], m, n, &A_d[ii], n);   //1
         scale <<< m, dimBlock >>> (&A_d[ii], m, n, &R_d[ii*n + ii]);    //2-3
         scale <<< n - ii, dimBlock >>> (&R_d[ii*n + ii], n-ii, 1, &R_d[ii*n + ii]);   //2-4
-        r1_update <<< dimGrid, dimBlock >>> (&A_d[ii + 1], m, n-ii-2, n, &A_d[ii], n, &R_d[ii]);    //5
+        r1_update <<< dimGrid, dimBlock >>> (&A_d[ii], m, n-ii-1, n, &A_d[ii], n, &R_d[ii]);    //5
     }
 
     checkCudaErrors(cudaMemcpy(A, A_d, m * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying A_d's data into A's space
@@ -119,8 +119,8 @@ __global__ void r1_update(double *A, int m, int n, int lda, double *col, int ldc
 
     //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)*R(ii,ii+1:n−1)
     if (idx < m && idy < m) {
-        for (int ii=0; ii < n; ii++) {
-            A[idx*lda + ii] = A[idx*lda + ii] - col[idy*ldc] * row[ii];
+        for (int ii=0; ii < n-1; ii++) {
+            A[idx*lda + ii+1] = A[idx*lda + ii+1] - col[idy*ldc] * row[ii+1];
         }
     }
 }
