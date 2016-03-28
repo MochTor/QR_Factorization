@@ -14,3 +14,5 @@ In seguito si è cercato di comprendere meglio i meccanismi di CUDA esposti a le
 Compresi perciò i meccanismi, si è potuto modificare il codice in seriale per adattarlo alla struttura CUDA, modificando le funzioni in modo tale che potessero lavorare con i threads, definendo i diversi kernel del programma e calcolando la giusta struttura di blocchi e threads che si sarebbero usati.
 
 Nel codice ogni funzione e ogni passo è descritto così da avere ben chiaro cosa si sta eseguendo.
+
+###Risultati
