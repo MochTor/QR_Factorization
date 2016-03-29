@@ -58,7 +58,7 @@ void gram(double* A, int m, int n, double *R) {
         sf = sqrt(R[ii*n + ii]);                            //2
         scale(&A[ii], m, n, sf);                            //3
         scale(&R[ii*n + ii], n, 1, sf);                     //4
-        r1_update(&A[ii+1], m, n-ii-2, n, &A[ii], n, &R[ii]);//5
+        r1_update(&A[ii], m, n-ii-1, n, &A[ii], n, &R[ii]);//5
     }
 }
 
@@ -81,9 +81,9 @@ void scale(double *d, int m, int ld, double s) {
 
 void r1_update(double *A, int m, int n, int lda, double *col, int ldc, double *row) {
     //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)∗R(ii,ii+1:n−1)
-    for (int ii = 0; ii < n; ii++) {
+    for (int ii = 0; ii < n-1; ii++) {
         for (int jj = 0; jj < m; jj++) {
-            A[jj*lda + ii] = A[jj*lda + ii] - col[jj*ldc] * row[ii];
+            A[jj*lda + ii+1] = A[jj*lda + ii+1] - col[jj*ldc] * row[ii+1];
         }
     }
 }

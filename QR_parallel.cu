@@ -19,10 +19,10 @@
 
 int main(int argc, char const *argv[]) {
     //--------------- Defining variables ---------------
-    // int m = 400;    //matrix rows number (first set)
-    // int n = 300;    //matrix columns number (first set)
-    int m = 1000;    //matrix rows number (second set)
-    int n = 800;     //matrix columns number (second set)
+    int m = 400;    //matrix rows number (first set)
+    int n = 300;    //matrix columns number (first set)
+    // int m = 1000;    //matrix rows number (second set)
+    // int n = 800;     //matrix columns number (second set)
 
     double *A_h, *R_h;  //A is the initial matrix, R the upper triangular matrix. Copy on host (_h)
 
@@ -49,7 +49,7 @@ int main(int argc, char const *argv[]) {
     //------------ Printing results on screen -----------
     cudaEventElapsedTime(&elapsedTime, start, stop);
     printf("Elapsed time: %7.5f s\n", elapsedTime/1000);   //elapsedTime keeps time in milliseconds
-    printf("Bandwidth: %7.5f GB/s\n", m*n * sizeof(double) / (elapsedTime/1000));
+    printf("Bandwidth: %7.5f GB/s\n", (m*n * sizeof(double)) / (elapsedTime/1000));
     //---------------------------------------------------
 
     cudaEventDestroy(start);
@@ -67,7 +67,8 @@ void initMatrix(double *A, int n) {
 void gram(double* A, int m, int n, double *R) {
     double *A_d, *R_d;  //A is the initial matrix, R the upper triangular matrix. Copy on device (_d)
     dim3 dimBlock(THREADS_PER_BLOCK, 1, 1); //as required, each block has 512 threads
-    dim3 dimGrid(THREADS_PER_BLOCK, (THREADS_PER_BLOCK + m - 1)/THREADS_PER_BLOCK, 1);
+    dim3 dimGrid(THREADS_PER_BLOCK, (THREADS_PER_BLOCK -1 + m)/THREADS_PER_BLOCK, 1);   //for bigger matrix
+    //dim3 dimGrid(m, 1, 1);  //for small matrix
 
     checkCudaErrors(cudaMalloc((void **) &A_d, m * n *sizeof(double))); //allocating A's memory on device
     checkCudaErrors(cudaMalloc((void **) &R_d, n *n *sizeof(double)) ); //allocating R's memory on device
@@ -76,10 +77,10 @@ void gram(double* A, int m, int n, double *R) {
     checkCudaErrors(cudaMemcpy(R_d, R, n * n *sizeof(double), cudaMemcpyHostToDevice)); //copying R's data into R_d's space
 
     for (int ii = 0; ii < n; ii++) {
-        xTA <<< n-1, dimBlock >>> (&R_d[ii*n + ii], n-ii, &A_d[ii], m, n, &A_d[ii], n);   //1
+        xTA <<< n-ii, dimBlock >>> (&R_d[ii*n + ii], n-ii, &A_d[ii], m, n, &A_d[ii], n);   //1
         scale <<< m, dimBlock >>> (&A_d[ii], m, n, &R_d[ii*n + ii]);    //2-3
         scale <<< n - ii, dimBlock >>> (&R_d[ii*n + ii], n-ii, 1, &R_d[ii*n + ii]);   //2-4
-        r1_update <<< dimGrid, dimBlock >>> (&A_d[ii + 1], m, n-ii-2, n, &A_d[ii], n, &R_d[ii]);    //5
+        r1_update <<< dimGrid, dimBlock >>> (&A_d[ii], m, n-ii-1, n, &A_d[ii], n, &R_d[ii]);    //5
     }
 
     checkCudaErrors(cudaMemcpy(A, A_d, m * n *sizeof(double), cudaMemcpyDeviceToHost)); //copying A_d's data into A's space
@@ -90,7 +91,7 @@ void gram(double* A, int m, int n, double *R) {
 }
 
 __global__ void xTA (double *y, int k, double*A, int m, int lda, double *x, int ldx) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
     double s;   //It memorizes the sum
 
     if (idx < k) {
@@ -106,7 +107,7 @@ __global__ void xTA (double *y, int k, double*A, int m, int lda, double *x, int 
  *                    it's not yet scaled, sqrt needs to be applied inside function (not as in serial code)
  */
 __global__ void scale(double *d, int m, int ld, double *s) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;    //it selects which threads is working on row vector (a row of R matrix)
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx < m) {
         d[idx*ld] = d[idx*ld] / sqrt(*s);    //Applying scale
@@ -119,8 +120,8 @@ __global__ void r1_update(double *A, int m, int n, int lda, double *col, int ldc
 
     //A(:,ii+1:n−1)=A(:,ii+1:n−1)−A(:,ii)*R(ii,ii+1:n−1)
     if (idx < m && idy < m) {
-        for (int ii=0; ii < n; ii++) {
-            A[idx*lda + ii] = A[idx*lda + ii] - col[idy*ldc] * row[ii];
+        for (int ii=0; ii < n-1; ii++) {
+            A[idx*lda + ii+1] = A[idx*lda + ii+1] - col[idy*ldc] * row[ii+1];
         }
     }
 }
