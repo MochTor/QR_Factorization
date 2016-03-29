@@ -22,7 +22,7 @@ Si sono eseguiti tutti i test in locale, su un computer dotato di GPU NVIDIA GeF
 ####Matrice 400x300
 Queste sono le diverse metriche ottenute per il tempo di calcolo della fattorizzazione usando una matrice 400x300
 - Tempo CPU codice seriale: 0.14118 s
-- Tempo GPU codice parallelo: 1.76394 s
+- Tempo GPU codice parallelo: 0.33932 s
 - Bandwidth GPU: 0.68029 GB/s
 - Speedup: tempo CPU codice seriale/Tempo GPU codice parallelo = 0.08
 
