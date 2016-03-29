@@ -49,7 +49,7 @@ int main(int argc, char const *argv[]) {
     //------------ Printing results on screen -----------
     cudaEventElapsedTime(&elapsedTime, start, stop);
     printf("Elapsed time: %7.5f s\n", elapsedTime/1000);   //elapsedTime keeps time in milliseconds
-    printf("Bandwidth: %7.5f GB/s\n", m*n * sizeof(double) / (elapsedTime/1000));
+    printf("Bandwidth: %7.5f GB/s\n", (m*n * sizeof(double)) / (elapsedTime/1000));
     //---------------------------------------------------
 
     cudaEventDestroy(start);
@@ -67,7 +67,8 @@ void initMatrix(double *A, int n) {
 void gram(double* A, int m, int n, double *R) {
     double *A_d, *R_d;  //A is the initial matrix, R the upper triangular matrix. Copy on device (_d)
     dim3 dimBlock(THREADS_PER_BLOCK, 1, 1); //as required, each block has 512 threads
-    dim3 dimGrid(THREADS_PER_BLOCK, (THREADS_PER_BLOCK -1 + m)/THREADS_PER_BLOCK, 1);
+    dim3 dimGrid(THREADS_PER_BLOCK, (THREADS_PER_BLOCK -1 + m)/THREADS_PER_BLOCK, 1);   //for bigger matrix
+    //dim3 dimGrid(m, 1, 1);  //for small matrix
 
     checkCudaErrors(cudaMalloc((void **) &A_d, m * n *sizeof(double))); //allocating A's memory on device
     checkCudaErrors(cudaMalloc((void **) &R_d, n *n *sizeof(double)) ); //allocating R's memory on device
