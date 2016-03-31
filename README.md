@@ -17,3 +17,9 @@ CUDA consists of libraries and toolkits available for free.
 ##Compiling
 To compile the serial program you just need a C compiler (as gcc), and compile it just any other C program. <br/>
 To compile the parallel program, you need to download, install and configure CUDA toolkits from NVIDIA site. Then you can compile it using _nvcc_ comand.
+
+No particular flag needed (just make sure to have all CUDA libraries to avoid warnings or compiling errors).
+
+##Run
+To run the programs you just need to run the object file created after compiling. <br/>
+E.g: QR\_parallel is the executable file for the parallel program (obtained from **nvcc QR\_parallel.cu -o QR\_parallel**). *./QR\_parallel* runs the parallel program (matrix sizes can be set in code).
